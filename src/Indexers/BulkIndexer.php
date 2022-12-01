@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Collection;
 use ScoutElastic\Facades\ElasticClient;
 use ScoutElastic\Migratable;
 use ScoutElastic\Payloads\RawPayload;
-use ScoutElastic\Payloads\TypePayload;
+use ScoutElastic\Payloads\TypelessPayload;
 
 class BulkIndexer implements IndexerInterface
 {
@@ -18,7 +18,7 @@ class BulkIndexer implements IndexerInterface
         $model = $models->first();
         $indexConfigurator = $model->getIndexConfigurator();
 
-        $bulkPayload = new TypePayload($model);
+        $bulkPayload = new TypelessPayload($model);
 
         if (in_array(Migratable::class, class_uses_recursive($indexConfigurator))) {
             $bulkPayload->useAlias('write');
@@ -60,7 +60,7 @@ class BulkIndexer implements IndexerInterface
     {
         $model = $models->first();
 
-        $bulkPayload = new TypePayload($model);
+        $bulkPayload = new TypelessPayload($model);
 
         $models->each(function ($model) use ($bulkPayload) {
             $actionPayload = (new RawPayload)

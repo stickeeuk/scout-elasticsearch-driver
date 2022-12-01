@@ -11,6 +11,7 @@ use Laravel\Scout\Engines\Engine;
 use ScoutElastic\Builders\SearchBuilder;
 use ScoutElastic\Facades\ElasticClient;
 use ScoutElastic\Indexers\IndexerInterface;
+use ScoutElastic\Payloads\TypelessPayload;
 use ScoutElastic\Payloads\TypePayload;
 use stdClass;
 
@@ -103,7 +104,7 @@ class ElasticEngine extends Engine
             $searchRules = $builder->rules ?: $builder->model->getSearchRules();
 
             foreach ($searchRules as $rule) {
-                $payload = new TypePayload($builder->model);
+                $payload = new TypelessPayload($builder->model);
 
                 if (is_callable($rule)) {
                     $payload->setIfNotEmpty('body.query.bool', call_user_func($rule, $builder));
@@ -125,13 +126,13 @@ class ElasticEngine extends Engine
                 $payloadCollection->push($payload);
             }
         } else {
-            $payload = (new TypePayload($builder->model))
+            $payload = (new TypelessPayload($builder->model))
                 ->setIfNotEmpty('body.query.bool.must.match_all', new stdClass);
 
             $payloadCollection->push($payload);
         }
 
-        return $payloadCollection->map(function (TypePayload $payload) use ($builder, $options) {
+        return $payloadCollection->map(function (TypelessPayload $payload) use ($builder, $options) {
             $payload
                 ->setIfNotEmpty('body._source', $builder->select)
                 ->setIfNotEmpty('body.collapse.field', $builder->collapse)
@@ -272,7 +273,7 @@ class ElasticEngine extends Engine
      */
     public function searchRaw(Model $model, $query)
     {
-        $payload = (new TypePayload($model))
+        $payload = (new TypelessPayload($model))
             ->setIfNotEmpty('body', $query)
             ->get();
 
@@ -361,5 +362,33 @@ class ElasticEngine extends Engine
         $query
             ->orderBy($model->getScoutKeyName())
             ->unsearchable();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function lazyMap(Builder $builder, $results, $model)
+    {
+        return $this->modelFactory->makeLazyFromSearchResponse($results, $builder);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function createIndex($name, array $options = [])
+    {
+        if (isset($options['primaryKey'])) {
+            throw new InvalidArgumentException('It is not possible to change the primary key name');
+        }
+
+        $this->indexManager->create(new IndexBlueprint($name));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function deleteIndex($name)
+    {
+        $this->indexManager->drop($name);
     }
 }
