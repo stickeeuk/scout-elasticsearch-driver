@@ -84,8 +84,8 @@ class FilterBuilder extends Builder
      * Supported operators are =, &gt;, &lt;, &gt;=, &lt;=, &lt;&gt;
      *
      * @param string|\Closure $field
-     * @param null $operator
-     * @param null $value
+     * @param bool|float|int|string|null $operator
+     * @param bool|float|int|string|null $value
      * @param string $boolean
      * @return $this|FilterBuilder
      */
@@ -164,8 +164,8 @@ class FilterBuilder extends Builder
 
     /**
      * @param $column
-     * @param null $operator
-     * @param null $value
+     * @param bool|float|int|string|null $operator
+     * @param bool|float|int|string|null $value
      * @return $this|\Illuminate\Database\Query\Builder
      */
     public function orWhere($column, $operator = null, $value = null)
