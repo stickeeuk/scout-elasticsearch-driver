@@ -233,11 +233,11 @@ class FilterBuilder extends Builder
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-terms-query.html Terms query
      *
      * @param  string  $field
-     * @param  array  $value
+     * @param  \Illuminate\Contracts\Support\Arrayable|array  $value
      * @param string $boolean
      * @return $this
      */
-    public function whereIn($field, array $value, $boolean = 'must')
+    public function whereIn($field, $value, $boolean = 'must')
     {
         $this->wheres[$boolean][] = [
             'terms' => [
@@ -264,11 +264,11 @@ class FilterBuilder extends Builder
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-terms-query.html Terms query
      *
      * @param  string  $field
-     * @param  array  $value
+     * @param  \Illuminate\Contracts\Support\Arrayable|array  $value
      * @param string $boolean
      * @return $this
      */
-    public function whereNotIn($field, array $value, $boolean = 'must')
+    public function whereNotIn($field, $value, $boolean = 'must')
     {
         $term = [
             'terms' => [
